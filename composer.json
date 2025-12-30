@@ -1,0 +1,81 @@
+{
+  "name": "wp-spaghetti/wp-mail-transport",
+  "description": "Symfony Mailer transport for WordPress wp_mail() - works with any Laravel + WordPress setup: Acorn (w/wo Sage), WP Starter, Corcel, or custom integrations",
+  "license": "GPL-3.0-or-later",
+  "type": "library",
+  "keywords": [
+    "wordpress",
+    "laravel",
+    "mail",
+    "email",
+    "symfony-mailer",
+    "transport",
+    "wp-mail",
+    "acorn",
+    "sage",
+    "wpstarter",
+    "corcel"
+  ],
+  "authors": [
+    {
+      "name": "Frugan",
+      "email": "dev@frugan.it",
+      "homepage": "https://github.com/frugan-dev",
+      "role": "Developer"
+    }
+  ],
+  "homepage": "https://github.com/wp-spaghetti/wp-mail-transport",
+  "support": {
+    "issues": "https://github.com/wp-spaghetti/wp-mail-transport/issues",
+    "source": "https://github.com/wp-spaghetti/wp-mail-transport",
+    "docs": "https://github.com/wp-spaghetti/wp-mail-transport#readme"
+  },
+  "funding": [
+    {
+      "type": "custom",
+      "url": "https://buymeacoff.ee/frugan"
+    }
+  ],
+  "require": {
+    "php": ">=8.2",
+    "illuminate/support": "^10.0 || ^11.0 || ^12.0",
+    "symfony/mailer": "^6.0 || ^7.0"
+  },
+  "require-dev": {
+    "ergebnis/composer-normalize": "^2.48",
+    "laravel/pint": "^1.0",
+    "phpunit/phpunit": "^11.0"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "WpSpaghetti\\WpMailTransport\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WpSpaghetti\\WpMailTransport\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "ergebnis/composer-normalize": true
+    },
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "WpSpaghetti\\WpMailTransport\\WpMailServiceProvider"
+      ]
+    }
+  },
+  "scripts": {
+    "pint": "pint",
+    "pint:test": "pint --test",
+    "test": "phpunit"
+  }
+}
