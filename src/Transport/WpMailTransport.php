@@ -66,9 +66,9 @@ class WpMailTransport extends AbstractTransport
             // Determine content type and body
             [$contentType, $body] = $this->prepareBody($email);
 
-            // Add Content-Type header if HTML
-            if ($contentType === 'text/html') {
-                $headers[] = 'Content-Type: text/html; charset=UTF-8';
+            // Add Content-Type header (html or multipart)
+            if ($contentType !== 'text/plain') {
+                $headers[] = 'Content-Type: '.$contentType;
             }
 
             // Prepare recipients
@@ -193,12 +193,26 @@ class WpMailTransport extends AbstractTransport
     private function prepareBody(\Symfony\Component\Mime\Email $email): array
     {
         $htmlBody = $email->getHtmlBody();
+        $textBody = $email->getTextBody();
+
+        if ($htmlBody !== null && $textBody !== null) {
+            $boundary = 'boundary_'.\md5(\uniqid('', true));
+            $body = "--{$boundary}\r\n"
+                ."Content-Type: text/plain; charset=UTF-8\r\n\r\n"
+                .$textBody."\r\n"
+                ."--{$boundary}\r\n"
+                ."Content-Type: text/html; charset=UTF-8\r\n\r\n"
+                .$htmlBody."\r\n"
+                ."--{$boundary}--";
+
+            return ['multipart/alternative; boundary="'.$boundary.'"', $body];
+        }
 
         if ($htmlBody !== null) {
             return ['text/html', $htmlBody];
         }
 
-        return ['text/plain', $email->getTextBody() ?? ''];
+        return ['text/plain', $textBody ?? ''];
     }
 
     /**
