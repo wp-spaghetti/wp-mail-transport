@@ -19,6 +19,21 @@ declare(strict_types=1);
 
 namespace App\Examples;
 
+use App\Mail\AutomatedEmail;
+use App\Mail\CommentApproved;
+use App\Mail\MarkdownEmail;
+use App\Mail\MonthlyNewsletter;
+use App\Mail\NewOrderNotification;
+use App\Mail\Newsletter;
+use App\Mail\NewsletterEmail;
+use App\Mail\OrderCompleted;
+use App\Mail\PostPublished;
+use App\Mail\SupportEmail;
+use App\Mail\TestEmail;
+use App\Mail\VIPNewsletter;
+use App\Mail\WelcomeEmail;
+use App\Models\User;
+use App\Notifications\InvoicePaid;
 use Illuminate\Support\Facades\Mail;
 
 class MailExamples
@@ -81,13 +96,13 @@ class MailExamples
      */
     public function usingMailables(): void
     {
-        $user = \App\Models\User::find(1);
+        $user = User::find(1);
 
         // Send using mailable
-        Mail::to($user->email)->send(new \App\Mail\WelcomeEmail($user));
+        Mail::to($user->email)->send(new WelcomeEmail($user));
 
         // Queue email for later sending
-        Mail::to($user->email)->queue(new \App\Mail\NewsletterEmail);
+        Mail::to($user->email)->queue(new NewsletterEmail);
     }
 
     /**
@@ -126,7 +141,7 @@ class MailExamples
             $user = \get_userdata($userId);
 
             Mail::to($user->user_email)->send(
-                new \App\Mail\WelcomeEmail($user)
+                new WelcomeEmail($user)
             );
         });
 
@@ -135,7 +150,7 @@ class MailExamples
             $author = \get_userdata($post->post_author);
 
             Mail::to($author->user_email)
-                ->send(new \App\Mail\PostPublished($post));
+                ->send(new PostPublished($post));
         }, 10, 2);
 
         // Send email on comment approval
@@ -144,7 +159,7 @@ class MailExamples
                 $comment = \get_comment($commentId);
 
                 Mail::to($comment->comment_author_email)
-                    ->send(new \App\Mail\CommentApproved($comment));
+                    ->send(new CommentApproved($comment));
             }
         }, 10, 2);
     }
@@ -159,7 +174,7 @@ class MailExamples
             $order = \wc_get_order($orderId);
 
             Mail::to('admin@example.com')
-                ->send(new \App\Mail\NewOrderNotification($order));
+                ->send(new NewOrderNotification($order));
         });
 
         // Send email on order status change
@@ -168,7 +183,7 @@ class MailExamples
 
             if ($newStatus === 'completed') {
                 Mail::to($order->get_billing_email())
-                    ->send(new \App\Mail\OrderCompleted($order));
+                    ->send(new OrderCompleted($order));
             }
         }, 10, 3);
     }
@@ -179,12 +194,12 @@ class MailExamples
     public function conditionalMailer(): void
     {
         // Use WP Mail transport by default
-        Mail::to('user@example.com')->send(new \App\Mail\Newsletter);
+        Mail::to('user@example.com')->send(new Newsletter);
 
         // Use SMTP for specific emails
         Mail::mailer('smtp')
             ->to('vip@example.com')
-            ->send(new \App\Mail\VIPNewsletter);
+            ->send(new VIPNewsletter);
     }
 
     /**
@@ -192,11 +207,11 @@ class MailExamples
      */
     public function bulkEmails(): void
     {
-        $users = \App\Models\User::where('subscribed', true)->get();
+        $users = User::where('subscribed', true)->get();
 
         foreach ($users as $user) {
             Mail::to($user->email)
-                ->queue(new \App\Mail\MonthlyNewsletter($user));
+                ->queue(new MonthlyNewsletter($user));
         }
     }
 
@@ -211,7 +226,7 @@ class MailExamples
         }
 
         // Now all emails go to developer@example.com in local env
-        Mail::to('anyone@example.com')->send(new \App\Mail\TestEmail);
+        Mail::to('anyone@example.com')->send(new TestEmail);
     }
 
     /**
@@ -228,7 +243,7 @@ class MailExamples
 
         // Send test email - debug info will be logged to Laravel logs
         Mail::to('test@example.com')
-            ->send(new \App\Mail\TestEmail);
+            ->send(new TestEmail);
 
         // Check logs in storage/logs/laravel.log
     }
@@ -240,12 +255,12 @@ class MailExamples
     {
         Mail::to('user@example.com')
             ->from('noreply@example.com', 'No Reply')
-            ->send(new \App\Mail\AutomatedEmail);
+            ->send(new AutomatedEmail);
 
         // Different sender for different types
         Mail::to('customer@example.com')
             ->from('support@example.com', 'Support Team')
-            ->send(new \App\Mail\SupportEmail);
+            ->send(new SupportEmail);
     }
 
     /**
@@ -265,10 +280,10 @@ class MailExamples
      */
     public function notifications(): void
     {
-        $user = \App\Models\User::find(1);
+        $user = User::find(1);
 
         // Using Laravel notifications
-        $user->notify(new \App\Notifications\InvoicePaid($invoice));
+        $user->notify(new InvoicePaid($invoice));
     }
 
     /**
@@ -277,6 +292,6 @@ class MailExamples
     public function markdownEmails(): void
     {
         Mail::to('user@example.com')
-            ->send(new \App\Mail\MarkdownEmail);
+            ->send(new MarkdownEmail);
     }
 }

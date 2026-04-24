@@ -18,6 +18,7 @@ use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\MessageConverter;
 
 /**
@@ -88,7 +89,7 @@ class WpMailTransport extends AbstractTransport
             // Send email via wp_mail
             $sent = \wp_mail(
                 $to,
-                $email->getSubject() ?? '',
+                $this->encodeSubject($email->getSubject() ?? ''),
                 $body,
                 $headers,
                 $attachments
@@ -132,7 +133,7 @@ class WpMailTransport extends AbstractTransport
      *
      * @return array<string>
      */
-    private function prepareHeaders(\Symfony\Component\Mime\Email $email): array
+    private function prepareHeaders(Email $email): array
     {
         $headers = [];
 
@@ -168,7 +169,7 @@ class WpMailTransport extends AbstractTransport
      *
      * @return array<string>
      */
-    private function prepareAttachments(\Symfony\Component\Mime\Email $email): array
+    private function prepareAttachments(Email $email): array
     {
         $attachments = [];
 
@@ -190,7 +191,7 @@ class WpMailTransport extends AbstractTransport
      *
      * @return array{string, string} [contentType, body]
      */
-    private function prepareBody(\Symfony\Component\Mime\Email $email): array
+    private function prepareBody(Email $email): array
     {
         $htmlBody = $email->getHtmlBody();
         $textBody = $email->getTextBody();
@@ -213,6 +214,24 @@ class WpMailTransport extends AbstractTransport
         }
 
         return ['text/plain', $textBody ?? ''];
+    }
+
+    /**
+     * Pre-encode the subject as RFC 2047 Base64 if it contains non-ASCII
+     * characters. PHPMailer may hold an empty CharSet in certain WordPress
+     * configurations (e.g. PHPMailer 7.x default + multipart content-type
+     * interaction), which would produce malformed encoded-word headers
+     * (=??Q?...?=). Encoding here guarantees a valid header regardless of
+     * PHPMailer's internal state: it receives an all-ASCII string and
+     * returns it unchanged from encodeHeader().
+     */
+    private function encodeSubject(string $subject): string
+    {
+        if (\mb_check_encoding($subject, 'ASCII')) {
+            return $subject;
+        }
+
+        return '=?UTF-8?B?'.\base64_encode($subject).'?=';
     }
 
     /**
