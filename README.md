@@ -32,7 +32,7 @@ Works with any Laravel + WordPress setup: [Acorn](https://github.com/roots/acorn
 
 - PHP >= 8.2
 - WordPress >= 6.0
-- Laravel Illuminate/Support ^10.0|^11.0|^12.0
+- Laravel Illuminate/Support ^10.0|^11.0|^12.0|^13.0
 - Symfony Mailer ^6.0|^7.0
 
 ## Installation
