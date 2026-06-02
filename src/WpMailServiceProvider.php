@@ -46,7 +46,7 @@ class WpMailServiceProvider extends ServiceProvider
         // Register the WP Mail transport driver
         $this->app->resolving(MailManager::class, function (MailManager $mailManager): void {
             $mailManager->extend('wp-mail', function () {
-                $debug = \config('wp-mail.debug', false);
+                $debug = \filter_var(\config('wp-mail.debug', false), FILTER_VALIDATE_BOOLEAN);
 
                 return new WpMailTransport($debug);
             });
